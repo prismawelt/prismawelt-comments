@@ -69,7 +69,14 @@ test('delete targets one comment and requires its acknowledgement', async () => 
     body: { data: { deleteDiscussionComment: { clientMutationId: 'comment-1' } } },
   });
   await api.deleteDiscussionComment('comment-1', 'fixture-token');
-  assert.deepEqual(calls[0].body.variables, { id: 'comment-1' });
+  assert.deepEqual(calls[0].body.variables, {
+    id: 'comment-1',
+    clientMutationId: 'comment-1',
+  });
+  // GitHub treats ID and String as distinct GraphQL types even when both values are strings.
+  assert.match(calls[0].body.query, /\$id: ID!/);
+  assert.match(calls[0].body.query, /\$clientMutationId: String!/);
+  assert.match(calls[0].body.query, /clientMutationId: \$clientMutationId/);
   assert.match(calls[0].body.query, /deleteDiscussionComment/);
   assert.doesNotMatch(calls[0].body.query, /\bdeleteDiscussion\(/);
   const bad = mutations({ body: { data: { deleteDiscussionComment: null } } });

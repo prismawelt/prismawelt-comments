@@ -33,12 +33,12 @@ export async function updateDiscussionComment(id: string, body: string, token: s
 
 export async function deleteDiscussionComment(id: string, token: string) {
   const data = await mutate(
-    `mutation($id: ID!) {
-      deleteDiscussionComment(input: {id: $id, clientMutationId: $id}) {
+    `mutation($id: ID!, $clientMutationId: String!) {
+      deleteDiscussionComment(input: {id: $id, clientMutationId: $clientMutationId}) {
         clientMutationId
       }
     }`,
-    { id },
+    { id, clientMutationId: id },
     token,
   );
   if (data.deleteDiscussionComment?.clientMutationId !== id) {

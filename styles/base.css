@@ -1028,3 +1028,11 @@ img.emoji {
   text-decoration: underline;
   color: var(--color-prettylights-syntax-constant-other-reference-link);
 }
+
+.gsc-comment-actions > summary::marker {
+  content: "";
+}
+
+.gsc-comment-actions > summary::-webkit-details-marker {
+  display: none;
+}

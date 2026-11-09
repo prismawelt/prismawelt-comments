@@ -38,6 +38,9 @@ export async function getStaticProps({ locale }: GetStaticPropsContext) {
   );
 
   const comment: IComment = {
+    body: '',
+    viewerCanUpdate: false,
+    viewerCanDelete: false,
     author: {
       avatarUrl: 'https://avatars.githubusercontent.com/in/106117',
       login: 'giscus',

@@ -18,7 +18,8 @@
     "lint": "stylelint styles/**/*.css && eslint . --cache --max-warnings 0",
     "lint:fix": "stylelint --fix styles/**/*.css && eslint --fix . --cache --max-warnings 0",
     "format": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "format:fix": "prettier --write .",
+    "test:moderation": "node --test tests/comment-moderation.test.cjs"
   },
   "dependencies": {
     "@next/bundle-analyzer": "^12.3.4",
@@ -62,5 +63,8 @@
     "tailwindcss": "^3.4.17",
     "tailwindcss-vanilla-rtl": "^0.4.0",
     "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }

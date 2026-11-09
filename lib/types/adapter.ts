@@ -34,7 +34,10 @@ interface IBaseComment {
   lastEditedAt: string | null;
   deletedAt: string | null;
   isMinimized: boolean;
+  body: string;
   bodyHTML: string;
+  viewerCanUpdate: boolean;
+  viewerCanDelete: boolean;
   reactions: IReactionGroups;
 }
 

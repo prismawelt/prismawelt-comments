@@ -52,6 +52,8 @@ export default function Giscus({ onDiscussionCreateRequest, onError }: IGiscusPr
     import('../lib/vendor/math-renderer-element');
   }, []);
 
+  const refreshComments = () => Promise.all([frontMutators.mutate(), backMutators.mutate()]);
+
   const handleDiscussionCreateRequest = async () => {
     const id = await onDiscussionCreateRequest();
     // Force revalidate
@@ -207,6 +209,7 @@ export default function Giscus({ onDiscussionCreateRequest, onError }: IGiscusPr
                   }
                   onCommentUpdate={frontMutators.updateComment}
                   onReplyUpdate={frontMutators.updateReply}
+                  onCommentsChanged={refreshComments}
                 />
               ))
             : null}
@@ -245,6 +248,7 @@ export default function Giscus({ onDiscussionCreateRequest, onError }: IGiscusPr
                   }
                   onCommentUpdate={backMutators.updateComment}
                   onReplyUpdate={backMutators.updateReply}
+                  onCommentsChanged={refreshComments}
                 />
               ))
             : null}

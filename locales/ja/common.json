@@ -60,7 +60,6 @@
   "cancel": "キャンセル",
   "signInWithGitHub": "GitHubアカウントでログイン",
   "writeAReply": "返信を書く",
-
   "upvote": "いいね",
   "addReactions": "リアクションを追加",
   "youMustBeSignedInToUpvote": "リアクションを追加するにはログインする必要があります",
@@ -77,7 +76,6 @@
   },
   "emoji": "絵文字",
   "nothingToPreview": "プレビューする内容がありません",
-
   "THUMBS_UP": "+1",
   "THUMBS_DOWN": "-1",
   "LAUGH": "笑い",
@@ -86,7 +84,6 @@
   "HEART": "好き",
   "ROCKET": "ロケット",
   "EYES": "目",
-
   "COLLABORATOR": "共同開発者",
   "CONTRIBUTOR": "貢献者",
   "FIRST_TIMER": "最初の投稿者",
@@ -95,5 +92,12 @@
   "MEMBER": "メンバー",
   "NONE": "なし",
   "OWNER": "所有者",
-  "APP": "アプリ"
+  "APP": "アプリ",
+  "commentActions": "コメントの操作",
+  "editComment": "編集",
+  "deleteComment": "削除",
+  "saveComment": "保存",
+  "confirmDeleteComment": "このコメントを削除しますか？",
+  "confirmDeleteCommentWithReplies": "このコメントの本文を削除しますか？返信は残ります。",
+  "commentActionFailed": "コメントの処理に失敗しました。もう一度お試しください。"
 }

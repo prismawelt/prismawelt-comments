@@ -7,6 +7,8 @@ import { toggleUpvote } from '../services/github/toggleUpvote';
 import CommentBox from './CommentBox';
 import ReactButtons from './ReactButtons';
 import Reply from './Reply';
+import CommentActions from './CommentActions';
+import CommentEditor from './CommentEditor';
 import { AuthContext } from '../lib/context';
 import { useDateFormatter, useGiscusTranslation, useRelativeTimeFormatter } from '../lib/i18n';
 
@@ -16,6 +18,7 @@ interface ICommentProps {
   replyBox?: ReactElement<typeof CommentBox>;
   onCommentUpdate?: (newComment: IComment, promise: Promise<unknown>) => void;
   onReplyUpdate?: (newReply: IReply, promise: Promise<unknown>) => void;
+  onCommentsChanged?: () => void | Promise<unknown>;
 }
 
 export default function Comment({
@@ -24,11 +27,13 @@ export default function Comment({
   replyBox,
   onCommentUpdate,
   onReplyUpdate,
+  onCommentsChanged,
 }: ICommentProps) {
   const { t, dir } = useGiscusTranslation();
   const formatDate = useDateFormatter();
   const formatDateDistance = useRelativeTimeFormatter();
   const [backPage, setBackPage] = useState(0);
+  const [isEditing, setEditing] = useState(false);
 
   const replies = comment.replies.slice(-5 - backPage * 50);
   const remainingReplies = comment.replyCount - replies.length;
@@ -127,6 +132,11 @@ export default function Comment({
                 {t('edited')}
               </button>
             ) : null}
+            <CommentActions
+              comment={comment}
+              onEdit={() => setEditing(true)}
+              onChanged={onCommentsChanged}
+            />
           </div>
         ) : null}
         {/*
@@ -134,22 +144,34 @@ export default function Comment({
           GitHub's markdown renderer result that allows keyboard interaction.
         */}
         {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-        <div
-          dir={children ? dir : 'auto'}
-          className={`markdown gsc-comment-content${
-            comment.isMinimized ? ' minimized color-bg-tertiary border-color-primary' : ''
-          }`}
-          onClick={handleCommentClick}
-          dangerouslySetInnerHTML={
-            hidden ? undefined : { __html: processCommentBody(comment.bodyHTML) }
-          }
-        >
-          {hidden ? (
-            <em className="color-text-secondary">
-              {comment.deletedAt ? t('thisCommentWasDeleted') : t('thisCommentWasMinimized')}
-            </em>
-          ) : null}
-        </div>
+        {isEditing ? (
+          <CommentEditor
+            comment={comment}
+            onCancel={() => setEditing(false)}
+            onSaved={async () => {
+              await onCommentsChanged?.();
+              setEditing(false);
+            }}
+          />
+        ) : (
+          // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+          <div
+            dir={children ? dir : 'auto'}
+            className={`markdown gsc-comment-content${
+              comment.isMinimized ? ' minimized color-bg-tertiary border-color-primary' : ''
+            }`}
+            onClick={handleCommentClick}
+            dangerouslySetInnerHTML={
+              hidden ? undefined : { __html: processCommentBody(comment.bodyHTML) }
+            }
+          >
+            {hidden ? (
+              <em className="color-text-secondary">
+                {comment.deletedAt ? t('thisCommentWasDeleted') : t('thisCommentWasMinimized')}
+              </em>
+            ) : null}
+          </div>
+        )}
         {children}
         {!comment.isMinimized && onCommentUpdate ? (
           <div className="gsc-comment-footer">
@@ -228,7 +250,12 @@ export default function Comment({
 
             {onReplyUpdate
               ? replies.map((reply) => (
-                  <Reply key={reply.id} reply={reply} onReplyUpdate={onReplyUpdate} />
+                  <Reply
+                    key={reply.id}
+                    reply={reply}
+                    onReplyUpdate={onReplyUpdate}
+                    onCommentsChanged={onCommentsChanged}
+                  />
                 ))
               : null}
           </div>

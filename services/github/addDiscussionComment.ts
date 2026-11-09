@@ -21,7 +21,10 @@ const ADD_DISCUSSION_COMMENT_QUERY = `
         lastEditedAt
         deletedAt
         isMinimized
+        body
         bodyHTML
+        viewerCanUpdate
+        viewerCanDelete
         reactionGroups {
           content
           users {
@@ -44,7 +47,10 @@ const ADD_DISCUSSION_COMMENT_QUERY = `
             lastEditedAt
             deletedAt
             isMinimized
-            bodyHTML
+            body
+        bodyHTML
+        viewerCanUpdate
+        viewerCanDelete
             reactionGroups {
               content
               users {

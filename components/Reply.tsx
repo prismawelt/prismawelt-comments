@@ -1,6 +1,8 @@
 import ReactButtons from './ReactButtons';
 import { IReply } from '../lib/types/adapter';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import CommentActions from './CommentActions';
+import CommentEditor from './CommentEditor';
 import { Reaction, updateCommentReaction } from '../lib/reactions';
 import { handleCommentClick, processCommentBody } from '../lib/adapter';
 import { useDateFormatter, useGiscusTranslation, useRelativeTimeFormatter } from '../lib/i18n';
@@ -8,9 +10,11 @@ import { useDateFormatter, useGiscusTranslation, useRelativeTimeFormatter } from
 interface IReplyProps {
   reply: IReply;
   onReplyUpdate: (newReply: IReply, promise: Promise<unknown>) => void;
+  onCommentsChanged?: () => void | Promise<unknown>;
 }
 
-export default function Reply({ reply, onReplyUpdate }: IReplyProps) {
+export default function Reply({ reply, onReplyUpdate, onCommentsChanged }: IReplyProps) {
+  const [isEditing, setEditing] = useState(false);
   const { t } = useGiscusTranslation();
   const formatDate = useDateFormatter();
   const formatDateDistance = useRelativeTimeFormatter();
@@ -88,6 +92,11 @@ export default function Reply({ reply, onReplyUpdate }: IReplyProps) {
                   {t('edited')}
                 </button>
               ) : null}
+              <CommentActions
+                comment={reply}
+                onEdit={() => setEditing(true)}
+                onChanged={onCommentsChanged}
+              />
             </div>
           ) : null}
           {/*
@@ -95,20 +104,32 @@ export default function Reply({ reply, onReplyUpdate }: IReplyProps) {
             GitHub's markdown renderer result that allows keyboard interaction.
           */}
           {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-          <div
-            dir="auto"
-            className={`markdown gsc-reply-content ${hidden ? ' not-shown' : ''}`}
-            onClick={handleCommentClick}
-            dangerouslySetInnerHTML={
-              hidden ? undefined : { __html: processCommentBody(reply.bodyHTML) }
-            }
-          >
-            {hidden ? (
-              <em className="color-text-secondary">
-                {reply.deletedAt ? t('thisCommentWasDeleted') : t('thisCommentWasHidden')}
-              </em>
-            ) : null}
-          </div>
+          {isEditing ? (
+            <CommentEditor
+              comment={reply}
+              onCancel={() => setEditing(false)}
+              onSaved={async () => {
+                await onCommentsChanged?.();
+                setEditing(false);
+              }}
+            />
+          ) : (
+            // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+            <div
+              dir="auto"
+              className={`markdown gsc-reply-content ${hidden ? ' not-shown' : ''}`}
+              onClick={handleCommentClick}
+              dangerouslySetInnerHTML={
+                hidden ? undefined : { __html: processCommentBody(reply.bodyHTML) }
+              }
+            >
+              {hidden ? (
+                <em className="color-text-secondary">
+                  {reply.deletedAt ? t('thisCommentWasDeleted') : t('thisCommentWasHidden')}
+                </em>
+              ) : null}
+            </div>
+          )}
           {!hidden ? (
             <div className="gsc-reply-footer">
               <div className="gsc-reply-reactions">

@@ -18,7 +18,10 @@ const ADD_DISCUSSION_REPLY_QUERY = `
         lastEditedAt
         deletedAt
         isMinimized
+        body
         bodyHTML
+        viewerCanUpdate
+        viewerCanDelete
         reactionGroups {
           content
           users {

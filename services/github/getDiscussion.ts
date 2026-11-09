@@ -45,7 +45,10 @@ const DISCUSSION_QUERY = `
       lastEditedAt
       deletedAt
       isMinimized
-      bodyHTML
+      body
+        bodyHTML
+        viewerCanUpdate
+        viewerCanDelete
       reactionGroups {
         content
         users {
@@ -69,7 +72,10 @@ const DISCUSSION_QUERY = `
           lastEditedAt
           deletedAt
           isMinimized
-          bodyHTML
+          body
+        bodyHTML
+        viewerCanUpdate
+        viewerCanDelete
           reactionGroups {
             content
             users {

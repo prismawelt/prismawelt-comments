@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Prismawelt 댓글 앱 연결</title>
+  <style>body{font:16px/1.6 system-ui,sans-serif;max-width:680px;margin:48px auto;padding:0 20px}button,input{font:inherit;padding:8px}input{width:100%;box-sizing:border-box}code{overflow-wrap:anywhere}[hidden]{display:none}</style>
+</head>
+<body>
+  <h1>Prismawelt 댓글 앱 연결</h1>
+  <div id="start">
+    <p>GitHub가 제공하는 등록 화면에서 앱을 만듭니다. 권한은 <strong>Discussions 읽기·쓰기</strong>이며, 앱 소유자는 등록한 본인입니다.</p>
+    <form id="register" method="post" action="https://github.com/settings/apps/new">
+      <input type="hidden" name="manifest" id="manifest">
+      <button type="submit">GitHub에서 댓글 앱 만들기</button>
+    </form>
+  </div>
+  <div id="complete" hidden>
+    <p>아래 일회용 설정 코드를 복사해 진행 중인 Codex 대화에 보내주세요. 앱의 실제 비밀키를 직접 복사할 필요는 없습니다.</p>
+    <input id="code" readonly aria-label="일회용 설정 코드">
+    <p><button id="copy" type="button">설정 코드 복사</button></p>
+    <p>이 코드는 한 번만 사용할 수 있고, 1시간 안에 연결을 마쳐야 합니다.</p>
+  </div>
+  <p id="message" role="status"></p>
+  <script>
+    const service = 'https://prismawelt-comments.vercel.app';
+    const url = new URL(location.href);
+    const code = url.searchParams.get('code');
+    const state = url.searchParams.get('state');
+    const message = document.querySelector('#message');
+    if (url.searchParams.has('installed')) {
+      document.querySelector('#start').hidden = true;
+      message.textContent = '앱 설치를 마쳤습니다. Codex 대화로 돌아가 설치 완료를 알려주세요.';
+    } else if (code) {
+      if (!state || state !== sessionStorage.getItem('prismawelt-app-setup-state')) {
+        document.querySelector('#start').hidden = true;
+        message.textContent = '등록 상태 확인에 실패했습니다. 등록 화면에서 다시 시작해 주세요.';
+      } else {
+        const input = document.querySelector('#code');
+        input.value = code;
+        history.replaceState(null, '', location.pathname);
+        sessionStorage.removeItem('prismawelt-app-setup-state');
+        document.querySelector('#start').hidden = true;
+        document.querySelector('#complete').hidden = false;
+        document.querySelector('#copy').onclick = async () => {
+          try { await navigator.clipboard.writeText(code); message.textContent = '복사했습니다.'; }
+          catch { input.focus(); input.select(); message.textContent = '선택된 코드를 복사해 주세요.'; }
+        };
+      }
+    } else {
+      document.querySelector('#register').onsubmit = () => {
+        const bytes = crypto.getRandomValues(new Uint8Array(32));
+        const state = Array.from(bytes, x => x.toString(16).padStart(2, '0')).join('');
+        sessionStorage.setItem('prismawelt-app-setup-state', state);
+        document.querySelector('#register').action = 'https://github.com/settings/apps/new?state=' + state;
+        document.querySelector('#manifest').value = JSON.stringify({
+          name: 'prismawelt-comments',
+          url: 'https://prismawelt.github.io',
+          description: 'GitHub Discussions comments for prismawelt.github.io, based on giscus.',
+          hook_attributes: { url: service + '/api/webhook', active: false },
+          redirect_url: service + '/setup.html',
+          callback_urls: [service + '/api/oauth/authorized'],
+          setup_url: service + '/setup.html?installed=1',
+          public: false,
+          default_permissions: { discussions: 'write' },
+          default_events: [],
+          request_oauth_on_install: false
+        });
+      };
+    }
+  </script>
+</body>
+</html>

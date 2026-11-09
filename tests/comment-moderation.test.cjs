@@ -107,11 +107,8 @@ function menu({
       'react/jsx-runtime': { jsx, jsxs: jsx },
       react: {
         useContext: () => ({ token }),
-        useEffect: () => {},
-        useRef: () => ({ current: { open: true } }),
         useState: (initial) => [initial, (value) => states.push(value)],
       },
-      '@primer/octicons-react': { KebabHorizontalIcon: 'icon' },
       '../lib/context': { AuthContext: {} },
       '../lib/i18n': { useGiscusTranslation: () => ({ t: (key) => key }) },
       '../services/github/commentMutations': {
@@ -166,7 +163,7 @@ function button(tree, label) {
   return null;
 }
 
-test('menus appear only for logged-in users with actual edit/delete permissions', () => {
+test('inline actions appear only for logged-in users with actual edit/delete permissions', () => {
   assert.equal(menu({ token: '' }).tree, null);
   assert.equal(menu({ update: false, remove: false }).tree, null);
   assert.equal(menu({ deleted: true }).tree, null);

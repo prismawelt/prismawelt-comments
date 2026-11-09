@@ -200,3 +200,24 @@ test('expired user tokens keep their status for reauthentication', async () => {
     (error) => error.status === 401,
   );
 });
+
+test('OAuth returns only to the blog or its comment service', () => {
+  const { parseCommentReturnUrl } = load('lib/oauth/return-url.ts', {}, { URL });
+  assert.equal(
+    parseCommentReturnUrl('https://prismawelt.github.io/ja/nichijou/mono/').hostname,
+    'prismawelt.github.io',
+  );
+  assert.equal(
+    parseCommentReturnUrl('https://prismawelt-comments.vercel.app/').hostname,
+    'prismawelt-comments.vercel.app',
+  );
+  for (const value of [
+    'https://attacker.example/',
+    'https://prismawelt.github.io.attacker.example/',
+    'https://user@prismawelt.github.io/',
+    'javascript:alert(1)',
+    ['https://prismawelt.github.io/'],
+  ]) {
+    assert.throws(() => parseCommentReturnUrl(value));
+  }
+});

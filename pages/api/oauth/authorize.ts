@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { encodeState } from '../../../lib/oauth/state';
 import { env } from '../../../lib/variables';
+import { parseCommentReturnUrl } from '../../../lib/oauth/return-url';
 
 const GITHUB_OAUTH_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize';
 
@@ -9,6 +10,13 @@ export default async function OAuthAuthorizeApi(req: NextApiRequest, res: NextAp
 
   if (!appReturnUrl) {
     res.status(400).json({ error: '`redirect_uri` is required.' });
+    return;
+  }
+
+  try {
+    parseCommentReturnUrl(appReturnUrl);
+  } catch {
+    res.status(400).json({ error: 'Invalid return URL' });
     return;
   }
 

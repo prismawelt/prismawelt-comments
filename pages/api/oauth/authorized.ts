@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { encodeState, decodeState } from '../../../lib/oauth/state';
 import { env } from '../../../lib/variables';
+import { parseCommentReturnUrl } from '../../../lib/oauth/return-url';
 
 const GITHUB_OAUTH_ACCESS_TOKEN_URL = 'https://github.com/login/oauth/access_token';
 const TOKEN_VALIDITY_PERIOD = 1000 * 60 * 60 * 24 * 365; // 1 year;
@@ -20,7 +21,13 @@ export default async function OAuthAuthorizedApi(req: NextApiRequest, res: NextA
     return;
   }
 
-  const returnUrl = new URL(appReturnUrl);
+  let returnUrl: URL;
+  try {
+    returnUrl = parseCommentReturnUrl(appReturnUrl);
+  } catch {
+    res.status(400).json({ error: 'Invalid return URL' });
+    return;
+  }
 
   if (error && error === 'access_denied') {
     res.redirect(302, returnUrl.href);
@@ -42,11 +49,21 @@ export default async function OAuthAuthorizedApi(req: NextApiRequest, res: NextA
   };
 
   let accessToken: string;
+  let expiresAt = Date.now() + TOKEN_VALIDITY_PERIOD;
   try {
     const response = await fetch(GITHUB_OAUTH_ACCESS_TOKEN_URL, init);
     if (response.ok) {
       const data = await response.json();
       accessToken = data.access_token;
+      if (typeof accessToken !== 'string' || !accessToken)
+        throw new Error('GitHub did not return an access token.');
+      if (
+        typeof data.expires_in === 'number' &&
+        Number.isFinite(data.expires_in) &&
+        data.expires_in > 0
+      ) {
+        expiresAt = Math.min(expiresAt, Date.now() + data.expires_in * 1000);
+      }
     } else {
       throw new Error(`Access token response had status ${response.status}.`);
     }
@@ -55,11 +72,7 @@ export default async function OAuthAuthorizedApi(req: NextApiRequest, res: NextA
     return;
   }
 
-  const session = await encodeState(
-    accessToken,
-    encryption_password,
-    Date.now() + TOKEN_VALIDITY_PERIOD,
-  );
+  const session = await encodeState(accessToken, encryption_password, expiresAt);
   returnUrl.searchParams.set('giscus', session);
 
   res.redirect(302, returnUrl.href);

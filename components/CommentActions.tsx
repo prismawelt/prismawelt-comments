@@ -71,7 +71,10 @@ export default function CommentActions({ comment, onEdit, onChanged }: Props) {
 
   return (
     <details className="gsc-comment-actions relative ml-2 shrink-0" ref={details}>
-      <summary className="btn list-none border-0 p-1 shadow-none" aria-label={t('commentActions')}>
+      <summary
+        className="btn inline-flex list-none items-center justify-center border-0 p-1 leading-none shadow-none"
+        aria-label={t('commentActions')}
+      >
         <KebabHorizontalIcon size={16} />
       </summary>
       <div className="color-bg-overlay color-border-primary absolute right-0 z-20 mt-1 min-w-[120px] rounded-md border p-1 shadow-md">

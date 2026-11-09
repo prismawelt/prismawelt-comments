@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function CommentActions({ comment, onEdit, onChanged }: Props) {
-  const { token } = useContext(AuthContext);
+  const { token, onSignOut } = useContext(AuthContext);
   const { t } = useGiscusTranslation();
   const details = useRef<HTMLDetailsElement>(null);
   const [busy, setBusy] = useState(false);
@@ -57,7 +57,11 @@ export default function CommentActions({ comment, onEdit, onChanged }: Props) {
       await deleteDiscussionComment(comment.id, token);
       if (details.current) details.current.open = false;
       await onChanged?.();
-    } catch {
+    } catch (error) {
+      if (error?.status === 401) {
+        onSignOut();
+        return;
+      }
       if (details.current) details.current.open = true;
       setError(true);
     } finally {

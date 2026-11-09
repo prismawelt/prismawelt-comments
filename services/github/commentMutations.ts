@@ -9,7 +9,7 @@ async function mutate(query: string, variables: Record<string, string>, token: s
   });
   const payload = await response.json();
   if (!response.ok || payload.errors?.length || !payload.data) {
-    throw new Error('Comment action failed');
+    throw Object.assign(new Error('Comment action failed'), { status: response.status });
   }
   return payload.data;
 }

@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function CommentEditor({ comment, onCancel, onSaved }: Props) {
-  const { token } = useContext(AuthContext);
+  const { token, onSignOut } = useContext(AuthContext);
   const { t } = useGiscusTranslation();
   const [body, setBody] = useState(comment.body);
   const textarea = useRef<HTMLTextAreaElement>(null);
@@ -28,7 +28,11 @@ export default function CommentEditor({ comment, onCancel, onSaved }: Props) {
     try {
       await updateDiscussionComment(comment.id, body, token);
       await onSaved();
-    } catch {
+    } catch (error) {
+      if (error?.status === 401) {
+        onSignOut();
+        return;
+      }
       setError(true);
     } finally {
       setBusy(false);

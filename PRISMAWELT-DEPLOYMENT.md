@@ -16,7 +16,7 @@ yarn build
 
 Deploy this repository as a Next.js project on Vercel using Node.js 22. The build succeeds without runtime credentials; commenting requires the GitHub App below.
 
-Register a dedicated GitHub App with Discussions read/write permission and install it only on `prismawelt/prismawelt.github.io`. Set its OAuth callback to `https://SERVICE_HOST/api/oauth/authorized`. Follow the upstream [self-hosting guide](SELF-HOSTING.md); user-token expiration must remain disabled for this version of giscus.
+Register a dedicated GitHub App with Discussions read/write permission and install it only on `prismawelt/prismawelt.github.io`. Set its OAuth callback to `https://SERVICE_HOST/api/oauth/authorized`. Use the upstream [self-hosting guide](SELF-HOSTING.md) for registration. This fork keeps GitHub's default expiring user tokens: expired sessions are cleared so the visitor can sign in again. It does not refresh user tokens in the background.
 
 Set these encrypted runtime environment variables in Vercel, never in Git:
 

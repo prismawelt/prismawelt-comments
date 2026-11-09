@@ -34,7 +34,11 @@ function mutations(response) {
     {
       fetch: async (url, options) => {
         calls.push({ url, ...options, body: JSON.parse(options.body) });
-        return { ok: response.ok !== false, json: async () => response.body };
+        return {
+          ok: response.ok !== false,
+          status: response.status || 200,
+          json: async () => response.body,
+        };
       },
     },
   );
@@ -187,4 +191,12 @@ test('confirmed deletion refreshes only after API success and preserves replies 
   await button(failed.tree, 'deleteComment').props.onClick();
   assert.equal(failed.refreshes, 0);
   assert.deepEqual(failed.states, [true, false, true, false]);
+});
+
+test('expired user tokens keep their status for reauthentication', async () => {
+  const { api } = mutations({ ok: false, status: 401, body: { message: 'Bad credentials' } });
+  await assert.rejects(
+    api.deleteDiscussionComment('comment-1', 'expired-fixture-token'),
+    (error) => error.status === 401,
+  );
 });
